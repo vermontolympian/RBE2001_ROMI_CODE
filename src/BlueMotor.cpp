@@ -23,15 +23,25 @@ void BlueMotor::setEffort(int effort, bool clockwise){
 }
 
 void BlueMotor::setEffort(float effort){
-    if(effort > 0){
-        digitalWrite(AIN1, HIGH);
+    if(effort == 0){
+        digitalWrite(AIN1, LOW);
         digitalWrite(AIN2, LOW);
         OCR1C = effort;
+    }
+    else if(effort > 0){
+        digitalWrite(AIN1, HIGH);
+        digitalWrite(AIN2, LOW);
+
+        int newEffort = map(effort, 0, 400, dbUp, 400);
+        OCR1C = newEffort;
     }
     else{
         digitalWrite(AIN1, LOW);
         digitalWrite(AIN2, HIGH);
-        OCR1C = abs(effort);
+
+        int newEffort = map(abs(effort), 0, 400, dbDown, 400);
+        Serial.println(newEffort);
+        OCR1C = newEffort;
     }
 }
 
@@ -71,6 +81,8 @@ void BlueMotor::setup(){
     const int encPin2 = 3;
     pinMode(encPin1, INPUT);//Encoder in 1
     pinMode(encPin2, INPUT);//Encoder in 2
+    pinMode(STOP, INPUT); //Stop Switch
+    count = 0;
 
     pinMode(4, OUTPUT);
     pinMode(11, OUTPUT);
@@ -94,4 +106,31 @@ float BlueMotor::getVelocity(){
     previousTime = currentTime;             //Reset time
     // return timeDifference;
     return(positionDifference / timeDifference) * 1000 * 60;
+}
+
+bool BlueMotor::home(){
+    if(digitalRead(STOP) == HIGH){
+        setEffort(0);
+        return true;
+    }
+    else if (digitalRead(STOP) == LOW){
+        setEffort(-400);
+        return false;
+    }
+}
+
+void BlueMotor::goToPosition(int degree){
+    long currentPosition = -1 * getPosition();
+
+    long desiredPosition = degree * 45;                 //TODO MATH
+
+    long error = desiredPosition - currentPosition;
+
+    totalError = totalError + error;
+
+    int effort = (kp*error - ki*(totalError) + kd*(error-previousError));
+
+    setEffort(effort);
+
+    previousError = error;
 }

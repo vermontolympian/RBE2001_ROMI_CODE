@@ -97,6 +97,7 @@ void checkRemote(){
   }
 }
 
+long currentTime = millis();
 
 void setup() 
 {
@@ -110,6 +111,7 @@ void setup()
 
 void loop() 
 {
+  /*
   newState = pc.isPressed();
   if(newState && !lastState){
     gripper.toggle();
@@ -130,5 +132,19 @@ void loop()
   else{
     motor.setEffort(0);
     motor.reset();
+  } */
+  
+  if(millis() > currentTime + 10){
+    motor.goToPosition(90);
+    Serial.println(motor.getPosition());
+    Serial.println("PID Effort");
+    Serial.println("corrected setEffortWithoutDB");
+    Serial.println(motor.getVelocity());
+    Serial.println(millis());
+    Serial.println("kp = 2.0  ki = 0.0  kd = 0.5");
+
+    currentTime = millis();
   }
+  else motor.setEffort(0);
+  
 }

@@ -10,6 +10,8 @@ class BlueMotor
         void setup();
         float getRadians();
         float getVelocity();
+        void goToPosition(int degree);
+        bool home();
 
     private:
         void setEffort(int effort, bool clockwise);
@@ -22,6 +24,18 @@ class BlueMotor
         const int ENCB = 1;
         const int EncoderRatio = 540;
 
+        const int STOP = 1;
+
         long previousTime = 0;
-        float previousPosition = 0;       
+        float previousPosition = 0;
+
+        double kp = 2.0;    //random numbers for kp, ki, & kd
+        double ki = 0.0;
+        double kd = 0.5;       
+
+        int dbUp = 200;
+        int dbDown = 180;
+
+        int previousError = 0;
+        long totalError = 0;
 };
